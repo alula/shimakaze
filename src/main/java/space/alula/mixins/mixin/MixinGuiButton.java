@@ -30,7 +30,7 @@ public abstract class MixinGuiButton extends Gui {
         int f = 0xa0 + (int) (squared * 0x40);
         int color = f << 16 | f << 8 | f;
         if (!self.enabled) {
-            color = 0xcccccc;
+            color = 0x666666;
         } else if (this.hovered) {
             if (fade < 1f) {
                 fade = Math.min(fade + partialTicks * 0.1f, 1);

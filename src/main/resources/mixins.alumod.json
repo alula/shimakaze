@@ -6,11 +6,13 @@
   "setSourceFile": true,
   "verbose": true,
   "mixins": [
+    "IMixinMinecraft",
     "MixinMainWindow",
     "MixinGuiIngame",
     "MixinGuiButton",
     "MixinGuiSlot",
     "MixinGuiScreen",
+    "MixinGuiWorldSelection",
     "MixinMinecraft",
     "MixinWorldClient"
   ]

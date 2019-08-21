@@ -2,21 +2,41 @@ package space.alula.mod.gui;
 
 import org.lwjgl.nanovg.NVGColor;
 import org.lwjgl.nanovg.NVGPaint;
+import space.alula.mod.util.Util;
+
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.nanovg.NanoVG.*;
 import static org.lwjgl.nanovg.NanoVGGL2.NVG_ANTIALIAS;
 import static org.lwjgl.nanovg.NanoVGGL2.nvgCreate;
 
 public abstract class SDrawable implements AutoCloseable {
-    protected static FontRenderer fontRenderer = new MinecraftFontRenderer();
-    private static long vg;
+    protected static FontRenderer fontRenderer = new NVGFontRenderer();
+    static long vg;
+    static boolean inFrame = false;
+    private static int roboto;
+    private static int robotoBold;
+    private static ByteBuffer robotoTTF;
+    private static ByteBuffer robotoBoldTTF;
+
     protected NVGColor color = NVGColor.create();
     protected NVGColor colorA = NVGColor.create();
     protected NVGColor colorB = NVGColor.create();
     protected NVGPaint shadowPaint = NVGPaint.create();
 
     public static void glInit() {
-        vg = nvgCreate(NVG_ANTIALIAS);
+        try {
+            vg = nvgCreate(NVG_ANTIALIAS);
+            robotoTTF = Util.ioResourceToByteBuffer("assets/shimakaze/fonts/Roboto-Regular.ttf", 350 * 1024);
+            roboto = nvgCreateFontMem(vg, "roboto", robotoTTF, 0);
+            robotoBoldTTF = Util.ioResourceToByteBuffer("assets/shimakaze/fonts/Roboto-Bold.ttf", 350 * 1024);
+            robotoBold = nvgCreateFontMem(vg, "roboto-bold", robotoBoldTTF, 0);
+
+            if (roboto == -1) throw new IllegalStateException("roboto font loading failed!");
+            if (robotoBold == -1) throw new IllegalStateException("roboto bold font loading failed!");
+        } catch (Exception e) {
+            throw new RuntimeException("GLInit failed", e);
+        }
     }
 
     protected int width;
@@ -29,7 +49,11 @@ public abstract class SDrawable implements AutoCloseable {
         this.scale = scale;
 
         nvgBeginFrame(vg, width, height, (float) scale);
+
+        inFrame = true;
         render();
+        inFrame = false;
+
         nvgEndFrame(vg);
     }
 
@@ -72,7 +96,10 @@ public abstract class SDrawable implements AutoCloseable {
         nvgFillColor(vg, color);
         nvgFill(vg);
 
-        nvgBoxGradient(vg, x, y + 2f, width, height, 2, 10, rgba(0, 0, 0, 128, colorA), rgba(0, 0, 0, 0, colorB), shadowPaint);
+        nvgBoxGradient(vg, x, y + (float) elevation, width, height, 2, elevation + 2,
+                rgba(0, 0, 0, 128, colorA),
+                rgba(0, 0, 0, 0, colorB),
+                shadowPaint);
         nvgBeginPath(vg);
         nvgRect(vg, x - 10f, y - 10f, width + 20f, height + 30f);
         nvgRoundedRect(vg, x, y, width, height, 1);

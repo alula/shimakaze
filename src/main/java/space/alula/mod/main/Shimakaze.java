@@ -1,6 +1,8 @@
 package space.alula.mod.main;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.SimpleReloadableResourceManager;
+import net.minecraft.resources.VanillaPack;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentString;
 import space.alula.mod.event.UpdateEvent;
@@ -42,12 +44,6 @@ public class Shimakaze {
 
     private void registerEvents() {
         eventBus.registerEventType(UpdateEvent.class);
-        eventBus.addListener(UpdateEvent.class, (t) -> {
-            if (minecraft.world != null && (minecraft.world.getGameTime() % 200) == 0) {
-                sendMessage("Your mom gay! \u00a7d" + minecraft.world.getGameTime());
-            }
-            return true;
-        });
     }
 
     public void initialize() {

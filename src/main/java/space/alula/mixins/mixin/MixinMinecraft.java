@@ -1,23 +1,26 @@
 package space.alula.mixins.mixin;
 
+import net.minecraft.client.GameSettings;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiGameOver;
-import net.minecraft.client.gui.GuiIngame;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.SimpleReloadableResourceManager;
+import net.minecraft.resources.VanillaPack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import space.alula.mixins.imp.IMixinMinecraft;
 import space.alula.mod.event.UpdateEvent;
-import space.alula.mod.gui.SDrawable;
 import space.alula.mod.gui.MainMenuScreen;
+import space.alula.mod.gui.SDrawable;
 import space.alula.mod.main.Shimakaze;
 
 import javax.annotation.Nullable;
@@ -25,15 +28,36 @@ import javax.annotation.Nullable;
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft implements IMixinMinecraft {
     @Shadow
-    public WorldClient world;
+    private WorldClient world;
 
     @Shadow
-    public EntityPlayerSP player;
+    private EntityPlayerSP player;
 
     @Shadow
-    public GuiIngame ingameGUI;
+    private GuiIngame ingameGUI;
 
-    public Shimakaze aluMod;
+    @Shadow
+    private GuiScreen currentScreen;
+
+    @Shadow
+    private GameSettings gameSettings;
+
+    @Shadow
+    private MouseHelper mouseHelper;
+
+    @Shadow
+    private SoundHandler soundHandler;
+
+    @Shadow
+    private MainWindow mainWindow;
+
+    @Shadow
+    private boolean skipRenderWorld;
+
+    @Shadow
+    private IReloadableResourceManager resourceManager;
+
+    private Shimakaze aluMod;
 
     @Inject(method = "init", at = @At("HEAD"))
     public void preInit(CallbackInfo ci) {
@@ -41,27 +65,48 @@ public abstract class MixinMinecraft implements IMixinMinecraft {
         aluMod.initialize();
     }
 
+    @Inject(method = "init", at = @At("RETURN"))
+    public void postInit(CallbackInfo ci) {
+        ((SimpleReloadableResourceManager) resourceManager).addResourcePack(new VanillaPack("shimakaze"));
+    }
+
     @Inject(method = "initMainWindow", at = @At("RETURN"))
-    @Shadow
     public void postGLInit(CallbackInfo ci) {
         SDrawable.glInit();
     }
 
-    @Override
-    public void addChatMessage(ITextComponent component) {
-        ingameGUI.addChatMessage(ChatType.CHAT, component);
-    }
+    @Overwrite
+    public void displayGuiScreen(@Nullable GuiScreen screen) {
+        if (this.currentScreen != null) {
+            this.currentScreen.onGuiClosed();
+        }
 
-    @Inject(method = "displayGuiScreen", at = @At("HEAD"))
-    public void displayGuiScreen(@Nullable GuiScreen screen, CallbackInfo ci) {
         if (screen == null && this.world == null) {
             screen = new MainMenuScreen();
         } else if (screen == null && this.player.getHealth() <= 0.0F) {
             screen = new GuiGameOver(null);
         }
 
+        if (screen instanceof GuiMainMenu || screen instanceof GuiMultiplayer) {
+            this.gameSettings.showDebugInfo = false;
+            this.ingameGUI.getChatGUI().clearChatMessages(true);
+        }
+
         if (screen instanceof GuiMainMenu) {
             screen = new MainMenuScreen();
+        }
+
+        this.currentScreen = screen;
+        if (screen != null) {
+            this.mouseHelper.ungrabMouse();
+            KeyBinding.unPressAllKeys();
+            screen.setWorldAndResolution((Minecraft) (Object) this,
+                    this.mainWindow.getScaledWidth(),
+                    this.mainWindow.getScaledHeight());
+            this.skipRenderWorld = false;
+        } else {
+            this.soundHandler.resume();
+            this.mouseHelper.grabMouse();
         }
     }
 
