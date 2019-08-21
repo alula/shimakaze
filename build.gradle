@@ -1,0 +1,111 @@
+import groovy.json.JsonSlurper
+import org.gradle.internal.os.OperatingSystem
+
+buildscript {
+    repositories {
+        maven { url = 'http://repo.spongepowered.org/maven' }
+        maven { url = 'https://plugins.gradle.org/m2/' }
+        maven { url 'https://www.jitpack.io' }
+        maven { url 'https://files.minecraftforge.net/maven' }
+    }
+
+    dependencies {
+        classpath "com.github.Chocohead:ForgeGradle:jitpack-SNAPSHOT"
+        classpath "org.spongepowered:mixingradle:${project.mixinGradleVersion}"
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle.tweaker-client'
+apply plugin: 'org.spongepowered.mixin'
+
+def minecraftVersion = "1.13.2"
+def minecraftRoot = System.getenv('APPDATA') + "/.minecraft"
+
+if (OperatingSystem.current().isMacOsX()) {
+    minecraftRoot = System.getenv('HOME') + "/Library/Application Support/minecraft"
+} else if (OperatingSystem.current().isLinux()) {
+    minecraftRoot = System.getenv('HOME') + "/.minecraft"
+}
+
+def versionJson = new JsonSlurper().parseText(file("${minecraftRoot}/versions/${minecraftVersion}/${minecraftVersion}.json").text)
+
+group 'space.alula'
+version "1.0.0"
+
+sourceCompatibility = targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url = 'http://repo.spongepowered.org/maven/' }
+    maven { url 'https://libraries.minecraft.net/' }
+    maven { url 'https://www.dimdev.org/maven/' }
+    maven { url 'https://www.jitpack.io' }
+}
+
+minecraft {
+    version = project.minecraftVersion
+    runDir = 'game'
+    mappings = project.mappingsVer
+    makeObfSourceJar = true
+    tweakClass = 'space.alula.launch.ShimakazeTweaker'
+    clientJvmArgs = ["-Dmixin.debug.verify=true", "-Djava.library.path=../natives", "-XX:-DisableExplicitGC"]
+}
+
+configurations {
+    deps
+    compile {
+        extendsFrom deps
+    }
+}
+
+dependencies {
+    deps "org.lwjgl:lwjgl-nanovg:3.1.6"
+    deps "org.lwjgl:lwjgl-nanovg:3.1.6:natives-linux"
+    compile("net.minecraft:launchwrapper:1.12") { transitive = false }
+    compile("org.dimdev:mixin:0.7.11-SNAPSHOT") { transitive = false }
+    implementation 'org.ow2.asm:asm:6.2'
+    implementation 'org.ow2.asm:asm-commons:6.2'
+}
+
+mixin {
+    defaultObfuscationEnv notch
+    add sourceSets.main, "mixins.alumod.refmap.json"
+}
+
+reobf {
+    jar {
+        mappingType = 'NOTCH'
+        classpath = sourceSets.main.compileClasspath
+    }
+}
+
+task runMCClient {
+    doLast {
+        javaexec {
+            //main = versionJson.mainClass
+            main = "net.minecraft.launchwrapper.Launch"
+            classpath = files(
+                    "build/libs/alumod-1.0.0.jar",
+                    "${minecraftRoot}/versions/${minecraftVersion}/${minecraftVersion}.jar"
+            )
+            classpath += sourceSets.main.runtimeClasspath.filter { !it.path.contains("minecraftBin") }
+            println((minecraftRoot + File.separator + "assets"))
+            jvmArgs = ["-Djava.library.path=../natives", "-Xmx1G", "-XX:+DisableExplicitGC", "-Dlegacy.debugClassLoading=true"]
+            args = [
+                    "--tweakClass",
+                    "space.alula.launch.ShimakazeTweaker",
+                    "--version", "${versionJson.id}",
+                    "--username", "Alula",
+                    "--accessToken", "-",
+                    "--assetsDir", (minecraftRoot + File.separator + "assets"),
+                    "--assetIndex", versionJson.assetIndex.id
+            ]
+
+            workingDir = file("./game")
+        }
+    }
+}
+
+runMCClient.dependsOn(":reobfJar")

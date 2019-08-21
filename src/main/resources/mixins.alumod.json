@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "space.alula.mixins.mixin",
+  "refmap": "mixins.alumod.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "setSourceFile": true,
+  "verbose": true,
+  "mixins": [
+    "MixinMainWindow",
+    "MixinGuiIngame",
+    "MixinGuiButton",
+    "MixinGuiSlot",
+    "MixinGuiScreen",
+    "MixinMinecraft",
+    "MixinWorldClient"
+  ]
+}

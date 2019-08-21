@@ -1,0 +1,9 @@
+JarIndex-Version: 1.0
+
+lwjgl-stb-natives-linux.jar
+META-INF
+META-INF/versions
+META-INF/versions/9
+liblwjgl_stb.so
+liblwjgl_stb.so.sha1
+

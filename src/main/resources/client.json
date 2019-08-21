@@ -1,0 +1,9 @@
+{
+  "name": "AluMod",
+  "website": "https://gitlab.com/EMC-Framework/EDK",
+  "author": "Alula",
+  "minVersion": "13.9.0",
+  "version": 1,
+  "main": "space.alula.mod.AluMod",
+  "updateLinkOverride": false
+}

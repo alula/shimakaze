@@ -1,0 +1,9 @@
+.idea
+build
+game
+.gradle
+*.iml
+*.class
+*.jar
+hs_err*
+*.log
