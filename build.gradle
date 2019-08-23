@@ -63,6 +63,8 @@ configurations {
 dependencies {
     deps "org.lwjgl:lwjgl-nanovg:3.1.6"
     deps "org.lwjgl:lwjgl-nanovg:3.1.6:natives-linux"
+    deps "org.graalvm.js:js:19.1.1"
+
     compile("net.minecraft:launchwrapper:1.12") { transitive = false }
     compile("org.dimdev:mixin:0.7.11-SNAPSHOT") { transitive = false }
     implementation 'org.ow2.asm:asm:6.2'

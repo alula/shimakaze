@@ -57,16 +57,17 @@ public abstract class MixinMinecraft implements IMixinMinecraft {
     @Shadow
     private IReloadableResourceManager resourceManager;
 
-    private Shimakaze aluMod;
+    private Shimakaze shimakaze;
 
     @Inject(method = "init", at = @At("HEAD"))
     public void preInit(CallbackInfo ci) {
-        aluMod = Shimakaze.getInstance();
-        aluMod.initialize();
+        shimakaze = Shimakaze.getInstance();
+        shimakaze.init();
     }
 
     @Inject(method = "init", at = @At("RETURN"))
     public void postInit(CallbackInfo ci) {
+        shimakaze.postInit();
         ((SimpleReloadableResourceManager) resourceManager).addResourcePack(new VanillaPack("shimakaze"));
     }
 
@@ -112,8 +113,8 @@ public abstract class MixinMinecraft implements IMixinMinecraft {
 
     @Inject(method = "runTick", at = @At("HEAD"))
     public void onTick(CallbackInfo ci) {
-        if (aluMod != null) {
-            aluMod.getEventBus().publishEmpty(UpdateEvent.class);
+        if (shimakaze != null) {
+            shimakaze.getEventBus().publishEmpty(UpdateEvent.class);
         }
     }
 }

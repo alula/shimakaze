@@ -13,26 +13,35 @@ public class NVGFontRenderer implements FontRenderer {
 
     @Override
     public void draw(String text, int x, int y) {
-        draw(text, x, y, 16);
+        draw(text, x, y, 16, 1, 1, 1, 1, "roboto");
+    }
+
+    public void draw(String text, int x, int y, float size) {
+        draw(text, x, y, size, 1, 1, 1, 1, "roboto");
     }
 
     @Override
-    public void draw(String text, int x, int y, float size) {
+    public void draw(String text, int x, int y, float size, float r, float g, float b, float a, String font) {
         if (vg == 0) return;
 
         nvgSave(vg);
 
-        color.r(1);
-        color.g(1);
-        color.b(1);
-        color.a(1);
+        color.r(r);
+        color.g(g);
+        color.b(b);
+        color.a(a);
 
         nvgFontSize(vg, size / 2);
-        nvgFontFace(vg, "roboto");
+        nvgFontFace(vg, font);
         nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-        //nvgTextMetrics(vg, null, null, metricBuffer);
+        nvgTextMetrics(vg, null, null, metricBuffer);
         nvgFillColor(vg, color);
         nvgText(vg, (float) x, (float) y, text);
         nvgRestore(vg);
+    }
+
+    @Override
+    public FloatBuffer getMetrics() {
+        return metricBuffer;
     }
 }

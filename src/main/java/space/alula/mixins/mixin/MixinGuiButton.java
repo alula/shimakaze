@@ -24,7 +24,7 @@ public abstract class MixinGuiButton extends Gui {
         GuiButton self = (GuiButton) (Object) this;
         if (!self.visible) return;
         this.hovered = p_render_1_ >= self.x && p_render_2_ >= self.y && p_render_1_ < self.x + this.width && p_render_2_ < self.y + this.height;
-        int gay = Util.gay();
+        int gay = Util.cycleColor();
 
         float squared = fade * (2 - fade);
         int f = 0xa0 + (int) (squared * 0x40);

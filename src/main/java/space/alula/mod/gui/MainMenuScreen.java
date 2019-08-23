@@ -44,7 +44,7 @@ public class MainMenuScreen extends GuiScreen {
 
         GlStateManager.scaled(4, 4, 1);
         String text = "Shimakaze";
-        drawCenteredString(Minecraft.getInstance().fontRenderer, text, scaledWidth / 8, 8, Util.gay());
+        drawCenteredString(Minecraft.getInstance().fontRenderer, text, scaledWidth / 8, 8, Util.cycleColor());
         GlStateManager.scaled(0.25, 0.25, 1);
 
         String copyrightShit = "made by Alula, Minecraft is © Mojang AB *blah blah blah*.";
