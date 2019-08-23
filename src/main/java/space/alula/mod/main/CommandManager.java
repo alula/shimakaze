@@ -16,6 +16,10 @@ public class CommandManager {
         commandMap.put(name, handler);
     }
 
+    public Consumer<List<String>> getCommand(String name) {
+        return commandMap.get(name.toLowerCase());
+    }
+
     public Map<String, Consumer<List<String>>> getCommandMap() {
         return commandMap;
     }
