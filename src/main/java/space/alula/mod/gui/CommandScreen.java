@@ -24,7 +24,7 @@ public class CommandScreen extends SDrawable implements GuiInputHandler {
         String cdata = lastString;
         int cpos = cursor;
 
-        setColor(0xee000000);
+        setColor(0xd0000000);
         drawRoundedRectMat(0, 0, 404, 204, 1);
 
         ConsoleHandler handler = Shimakaze.getInstance().getConsoleHandler();
